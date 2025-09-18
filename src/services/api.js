@@ -1,7 +1,10 @@
 // Lightweight API helper for YouShop renderer
-// In development (CRA) prefer the relative `/api` so the dev server proxy forwards requests
-// to the backend and avoids CORS. In production/Electron use `REACT_APP_API_URL` if provided.
-const API_BASE = (process.env.NODE_ENV === 'development')
+// Default behavior:
+// - In development prefer the CRA proxy (`/api`) so you don't run into CORS.
+// - If you explicitly set `REACT_APP_FORCE_REMOTE=true`, use `REACT_APP_API_URL` instead.
+// - In production use `REACT_APP_API_URL` when available, otherwise fall back to `/api`.
+const useForceRemote = String(process.env.REACT_APP_FORCE_REMOTE || '').toLowerCase() === 'true';
+const API_BASE = (process.env.NODE_ENV === 'development' && !useForceRemote)
   ? '/api'
   : (process.env.REACT_APP_API_URL || '/api');
 
@@ -16,6 +19,13 @@ async function request(path, options = {}) {
   try {
     // eslint-disable-next-line no-console
     console.debug('[api] request', { API_BASE, path, isElectronProxy: typeof window !== 'undefined' && !!(window.electronAPI && window.electronAPI.apiRequest) });
+    if (process.env.NODE_ENV === 'development' && API_BASE !== '/api') {
+      // Warn developer when making cross-origin requests from the browser during dev
+      // as this commonly triggers CORS or referrer-policy issues.
+      // Set REACT_APP_FORCE_REMOTE=true to silence this and force remote backend.
+      // eslint-disable-next-line no-console
+      console.warn('[api] Using remote API in development:', API_BASE, ' — you may see CORS/referrer issues in the browser. Use the CRA proxy (/api) or run Electron dev to avoid CORS.');
+    }
   } catch (e) {}
 
   // If running inside Electron and preload exposes apiRequest, use main-process proxy to avoid CORS

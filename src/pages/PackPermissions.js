@@ -40,8 +40,8 @@ const PackPermissions = () => {
       try {
         const [pks, perms] = await Promise.all([packsService.listPacks(), permService.listPermissions()]);
         if (!mounted) return;
-        setPacks(pks || []);
-        setPermissions(perms || []);
+  setPacks(pks || []);
+  setPermissions(Array.isArray(perms) ? perms : (perms ? [perms] : []));
       } catch (e) {
         // ignore for now
       } finally {
@@ -70,23 +70,56 @@ const PackPermissions = () => {
       setPerm(defaultPerm);
       return;
     }
-    const existing = permissions.find(p => p && p.pack && (p.pack.id === selectedPack.id || p.pack === selectedPack.id || p.pack === selectedPack.name || p.pack === selectedPack.id));
-    if (existing) setPerm({ ...existing });
-    else setPerm({ ...defaultPerm, pack: selectedPack, packId: selectedPack.id, name: selectedPack.name });
-  }, [selectedPack, permissions]);
+    // fetch permissions for the selected pack only
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      try {
+        const perms = await permService.getPermissionsForPack(selectedPack.id);
+        if (!mounted) return;
+        setPermissions(perms);
+        const existing = Array.isArray(perms) ? perms.find(p => {
+          if (!p) return false;
+          if (p.pack && (p.pack.id === selectedPack.id || p.pack === selectedPack)) return true;
+          if (p.packId && Number(p.packId) === Number(selectedPack.id)) return true;
+          return false;
+        }) : undefined;
+        if (existing) setPerm({ ...existing, pack: selectedPack, packId: existing.packId ?? (existing.pack && existing.pack.id) });
+        else setPerm({ ...defaultPerm, pack: selectedPack, packId: selectedPack.id, name: selectedPack.name });
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [selectedPack]);
 
   const handleSave = async () => {
     if (!selectedPack) return;
     setSaving(true);
     try {
+      // build explicit payload to avoid sending stale/extra pack fields
+      const payload = {
+        packId: selectedPack.id,
+        numberCommande: Number(perm.numberCommande || 0),
+        numberProduct: Number(perm.numberProduct || 0),
+        numberVariant: Number(perm.numberVariant || 0),
+        syncro: !!perm.syncro,
+        tracking: !!perm.tracking,
+        exchange: !!perm.exchange,
+        dashboard: perm.dashboard || ''
+      };
       if (perm.id) {
-        await permService.updatePermission(perm.id, perm);
+        await permService.updatePermission(perm.id, payload);
       } else {
-        await permService.createPermission(perm);
+        await permService.createPermission(payload);
       }
       const perms = await permService.listPermissions();
-      setPermissions(perms || []);
-      setPerm(prev => ({ ...prev }));
+      const normalized = Array.isArray(perms) ? perms : (perms ? [perms] : []);
+      setPermissions(normalized);
+      // pick saved entry for selectedPack and update local perm
+      const saved = normalized.find(p => (p && (Number(p.packId) === Number(selectedPack.id) || (p.pack && Number(p.pack.id) === Number(selectedPack.id)))));
+      if (saved) setPerm({ ...saved, pack: selectedPack });
+      else setPerm({ ...defaultPerm, pack: selectedPack, packId: selectedPack.id, name: selectedPack.name });
       try { window.toast && window.toast('Permissions saved'); } catch(e) { alert('Permissions saved'); }
     } catch (e) {
       try { window.toast && window.toast('Failed to save permissions', 'error'); } catch(e) { alert('Failed to save permissions'); }
@@ -97,7 +130,7 @@ const PackPermissions = () => {
 
   const handleReset = () => {
     if (!selectedPack) return;
-    const existing = permissions.find(p => p && p.pack && (p.pack.id === selectedPack.id || p.pack === selectedPack.id || p.pack === selectedPack.name));
+  const existing = Array.isArray(permissions) ? permissions.find(p => p && p.pack && (p.pack.id === selectedPack.id || p.pack === selectedPack.id || p.pack === selectedPack.name)) : undefined;
     if (existing) setPerm({ ...existing });
     else setPerm({ ...defaultPerm, pack: selectedPack, packId: selectedPack.id, name: selectedPack.name });
   };

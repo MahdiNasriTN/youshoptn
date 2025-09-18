@@ -1,6 +1,6 @@
 {
   "name": "ecommerce-saas-manager",
-  "version": "1.0.3",
+  "version": "1.0.3.1",
   "description": "Desktop application for managing e-commerce SAAS subscriptions",
   "main": "electron.js",
   "homepage": "./",
