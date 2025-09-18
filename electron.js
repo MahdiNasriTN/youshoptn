@@ -186,6 +186,36 @@ app.whenReady().then(() => {
   if (!isDev) {
     setupAutoUpdater();
   }
+
+  // Generic API proxy handler to avoid CORS issues from renderer
+  ipcMain.handle('api-request', async (event, opts) => {
+    try {
+      const fetch = require('node-fetch');
+      const url = opts.url;
+      // Basic host whitelist — only allow requests to trusted backend hosts
+      try {
+        const parsed = new URL(url);
+        const allowedHosts = ['backend.youshop.pro', 'localhost', '127.0.0.1'];
+        if (!allowedHosts.includes(parsed.hostname)) {
+          throw new Error('Host not allowed');
+        }
+      } catch (ee) {
+        throw ee;
+      }
+      const method = opts.method || 'GET';
+      const headers = opts.headers || {};
+      const body = opts.body || null;
+
+      const res = await fetch(url, { method, headers, body });
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
+      return { status: res.status, ok: res.ok, body: data };
+    } catch (e) {
+      flog('[api-proxy] request failed', e && (e.stack || e.message) ? (e.stack || e.message) : JSON.stringify(e));
+      throw e;
+    }
+  });
 });
 
 // Auto-updater setup and event handlers

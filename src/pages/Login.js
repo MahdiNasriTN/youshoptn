@@ -88,14 +88,14 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // If update is available or downloading, prevent login
     if (updateState.status === 'available' || updateState.status === 'downloading' || updateState.status === 'downloaded') {
       setError('Please update the application before signing in');
       return;
     }
 
-    // Very small mock auth: accept if email contains @ and password length >= 4
+    // Basic validation
     if (!email || !email.includes('@')) {
       setError('Please enter a valid email');
       return;
@@ -105,7 +105,8 @@ export default function Login() {
       return;
     }
 
-    // Mock user object
+    // Mock local login (no backend)
+    setError(null);
     const user = { id: Date.now(), name: 'Admin', email };
     actions.login(user);
   };

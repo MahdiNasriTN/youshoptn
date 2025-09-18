@@ -1,17 +1,25 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { Button } from '../ui';
+import UpdateModal from '../ui/UpdateModal';
+import { useState } from 'react';
 
 const Header = () => {
   const { state, actions } = useApp();
   const { currentView } = state;
   const currentTheme = state.settings?.theme || 'light';
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
+  // Open modal automatically when update becomes available or downloaded
+  if ((state.update && (state.update.status === 'available' || state.update.status === 'downloaded')) && !showUpdateModal) {
+    setShowUpdateModal(true);
+  }
 
   const getPageInfo = () => {
     const pageMap = {
       dashboard: {
         title: 'Dashboard',
-        description: 'test test'
+        description: 'testxd'
       },
       users: {
         title: 'Users Management',
@@ -96,6 +104,7 @@ const Header = () => {
           </div>
         </div>
       </div>
+      <UpdateModal isOpen={showUpdateModal} onClose={() => setShowUpdateModal(false)} />
     </header>
   );
 };

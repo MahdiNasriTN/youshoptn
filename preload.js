@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // App info
   getVersion: () => ipcRenderer.invoke('get-version'),
+  // Generic API request routed through the main process to avoid CORS
+  apiRequest: (opts) => ipcRenderer.invoke('api-request', opts),
   
   // Remove listeners
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel)

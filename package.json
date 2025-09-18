@@ -1,6 +1,6 @@
 {
   "name": "ecommerce-saas-manager",
-  "version": "1.1.2",
+  "version": "1.0.2",
   "description": "Desktop application for managing e-commerce SAAS subscriptions",
   "main": "electron.js",
   "homepage": "./",
@@ -21,10 +21,11 @@
     "saas",
     "management"
   ],
-  "author": "Your Name",
+  "author": "Mouaffak , Mahdi , Akrout",
   "license": "MIT",
   "dependencies": {
     "electron-updater": "^6.6.2",
+    "node-fetch": "^2.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
@@ -52,6 +53,7 @@
       "last 1 safari version"
     ]
   },
+  "proxy": "https://backend.youshop.pro",
   "build": {
     "appId": "com.yourcompany.ecommerce-saas-manager",
     "productName": "YouShop",
@@ -72,7 +74,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/icon.ico",
