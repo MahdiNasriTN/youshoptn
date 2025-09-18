@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Packs from './pages/Packs';
 import Analytics from './pages/Analytics';
+import PackPermissions from './pages/PackPermissions';
 
 const AppContent = () => {
   const { state } = useApp();
@@ -68,7 +69,7 @@ const AppContent = () => {
       case 'packs':
         return <Packs />;
       case 'permissions':
-        return <div className="text-center py-12"><h2 className="text-2xl">Permissions Management - Coming Soon</h2></div>;
+        return <PackPermissions />;
       case 'analytics':
         return <Analytics />;
       case 'settings':

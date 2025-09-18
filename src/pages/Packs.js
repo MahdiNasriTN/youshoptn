@@ -7,7 +7,7 @@ const Packs = () => {
   const { packs, users } = state;
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [newPack, setNewPack] = useState({ name: '', description: '', price: 0, period: 'month', features: [] });
+  const [newPack, setNewPack] = useState({ name: '', description: '', price: 0, most_popular: false, active_users: 0 });
   const [showEditModal, setShowEditModal] = useState(false);
   const [editPack, setEditPack] = useState(null);
   const [editing, setEditing] = useState(false);
@@ -38,10 +38,10 @@ const Packs = () => {
   };
 
   const togglePopular = (packId) => {
-    // persist popular state via savePack when available
+    // persist most_popular state via savePack when available
     const pack = packs.find(p => p.id === packId);
     if (!pack) return;
-    const updated = { ...pack, popular: !pack.popular };
+    const updated = { ...pack, most_popular: !pack.most_popular };
     if (actions.savePack) {
       actions.savePack(packId, updated);
     } else {
@@ -52,11 +52,10 @@ const Packs = () => {
   const handleCreatePack = async () => {
     setCreating(true);
     try {
-      // ensure features is an array
-      const payload = { ...newPack, features: Array.isArray(newPack.features) ? newPack.features : (typeof newPack.features === 'string' ? newPack.features.split(',').map(s => s.trim()).filter(Boolean) : []) };
+      const payload = { name: newPack.name, description: newPack.description, price: Number(newPack.price || 0), most_popular: !!newPack.most_popular, active_users: Number(newPack.active_users || 0) };
       const created = await actions.createPack(payload);
       setShowCreateModal(false);
-      setNewPack({ name: '', description: '', price: 0, period: 'month', features: [] });
+      setNewPack({ name: '', description: '', price: 0, most_popular: false, active_users: 0 });
     } catch (e) {
       // ignore for now
     } finally {
@@ -65,7 +64,7 @@ const Packs = () => {
   };
 
   const openEdit = (pack) => {
-    setEditPack({ ...pack, features: Array.isArray(pack.features) ? pack.features : [] });
+    setEditPack({ ...pack });
     setShowEditModal(true);
   };
 
@@ -73,11 +72,11 @@ const Packs = () => {
     if (!editPack) return;
     setEditing(true);
     try {
-      const payload = { ...editPack, features: Array.isArray(editPack.features) ? editPack.features : (typeof editPack.features === 'string' ? editPack.features.split(',').map(s=>s.trim()).filter(Boolean) : []) };
+      const payload = { name: editPack.name, description: editPack.description, price: Number(editPack.price || 0), most_popular: !!editPack.most_popular, active_users: Number(editPack.active_users || 0) };
       if (actions.savePack) {
         await actions.savePack(editPack.id, payload);
       } else {
-        actions.updatePack(payload);
+        actions.updatePack({ id: editPack.id, ...payload });
       }
       setShowEditModal(false);
       setEditPack(null);
@@ -148,15 +147,15 @@ const Packs = () => {
         ) : packs.length === 0 ? (
           <div className="col-span-full text-center py-12">No packs found.</div>
         ) : packs.map((pack) => {
-          const subscribedUsers = users.filter(user => user.pack === pack.name).length;
+          const subscribedUsers = typeof pack.active_users === 'number' ? pack.active_users : users.filter(user => user.pack === pack.name).length;
           
           return (
             <Card 
               key={pack.id} 
-              className={`relative ${pack.popular ? 'ring-2 ring-blue-500 scale-105' : ''}`}
+              className={`relative ${pack.most_popular ? 'ring-2 ring-blue-500 scale-105' : ''}`}
               hover
             >
-              {pack.popular && (
+                {pack.most_popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <Badge variant="primary" className="px-4 py-1">Most Popular</Badge>
                 </div>
@@ -171,19 +170,7 @@ const Packs = () => {
                 </div>
               </div>
               
-              <div className="space-y-3 mb-6">
-                {(pack.features || []).slice(0, 5).map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <i className="fas fa-check text-green-500"></i>
-                    <span className="text-gray-700 text-sm">{feature}</span>
-                  </div>
-                ))}
-                {Array.isArray(pack.features) && pack.features.length > 5 && (
-                  <div className="text-gray-500 text-sm">
-                    +{pack.features.length - 5} more features
-                  </div>
-                )}
-              </div>
+              <div className="space-y-3 mb-6"></div>
               
               <div className="space-y-3">
                 <Button className="w-full" onClick={() => openEdit(pack)}>
@@ -191,12 +178,12 @@ const Packs = () => {
                 </Button>
                 <div className="flex space-x-2">
                   <Button 
-                    variant={pack.popular ? 'primary' : 'secondary'}
+                    variant={pack.most_popular ? 'primary' : 'secondary'}
                     size="sm" 
                     className="flex-1"
                     onClick={() => togglePopular(pack.id)}
                   >
-                    {pack.popular ? 'Remove Popular' : 'Mark Popular'}
+                    {pack.most_popular ? 'Remove Popular' : 'Mark Popular'}
                   </Button>
                   <Button 
                     variant="danger" 
@@ -214,6 +201,12 @@ const Packs = () => {
                   <span>Active Users:</span>
                   <span className="font-medium">{subscribedUsers}</span>
                 </div>
+                {pack.updatedDatetime && (
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>Updated:</span>
+                    <span className="font-medium">{String(pack.updatedDatetime)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Monthly Revenue:</span>
                   <span className="font-medium text-green-600">${subscribedUsers * pack.price}</span>
@@ -246,16 +239,13 @@ const Packs = () => {
               <input type="number" value={newPack.price} onChange={(e) => setNewPack({...newPack, price: Number(e.target.value)})} className="w-full px-3 py-2 border rounded" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Period</label>
-              <select value={newPack.period} onChange={(e) => setNewPack({...newPack, period: e.target.value})} className="w-full px-3 py-2 border rounded">
-                <option value="month">month</option>
-                <option value="year">year</option>
-              </select>
+              <label className="block text-sm font-medium text-gray-700">Active Users</label>
+              <input type="number" value={newPack.active_users} onChange={(e) => setNewPack({...newPack, active_users: Number(e.target.value)})} className="w-full px-3 py-2 border rounded" />
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Features (comma separated)</label>
-            <input value={Array.isArray(newPack.features) ? newPack.features.join(', ') : (newPack.features || '')} onChange={(e) => setNewPack({...newPack, features: e.target.value})} className="w-full px-3 py-2 border rounded" />
+          <div className="flex items-center space-x-3">
+            <input id="most_popular_create" type="checkbox" checked={!!newPack.most_popular} onChange={(e) => setNewPack({...newPack, most_popular: e.target.checked})} />
+            <label htmlFor="most_popular_create" className="text-sm text-gray-700">Mark as Most Popular</label>
           </div>
           <div className="flex justify-end space-x-2">
             <Button variant="secondary" onClick={() => setShowCreateModal(false)}>Cancel</Button>
@@ -313,16 +303,13 @@ const Packs = () => {
                 <input type="number" value={editPack.price} onChange={(e) => setEditPack({...editPack, price: Number(e.target.value)})} className="w-full px-3 py-2 border rounded" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Period</label>
-                <select value={editPack.period} onChange={(e) => setEditPack({...editPack, period: e.target.value})} className="w-full px-3 py-2 border rounded">
-                  <option value="month">month</option>
-                  <option value="year">year</option>
-                </select>
+                <label className="block text-sm font-medium text-gray-700">Active Users</label>
+                <input type="number" value={editPack.active_users} onChange={(e) => setEditPack({...editPack, active_users: Number(e.target.value)})} className="w-full px-3 py-2 border rounded" />
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Features (comma separated)</label>
-              <input value={Array.isArray(editPack.features) ? editPack.features.join(', ') : (editPack.features || '')} onChange={(e) => setEditPack({...editPack, features: e.target.value})} className="w-full px-3 py-2 border rounded" />
+            <div className="flex items-center space-x-3">
+              <input id="most_popular_edit" type="checkbox" checked={!!editPack.most_popular} onChange={(e) => setEditPack({...editPack, most_popular: e.target.checked})} />
+              <label htmlFor="most_popular_edit" className="text-sm text-gray-700">Mark as Most Popular</label>
             </div>
             <div className="flex justify-end space-x-2">
               <Button variant="secondary" onClick={() => { setShowEditModal(false); setEditPack(null); }}>Cancel</Button>

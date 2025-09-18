@@ -147,7 +147,7 @@ function appReducer(state, action) {
       return {
         ...state,
         packs: state.packs.map(pack => (
-          pack ? { ...pack, popular: pack.id === action.payload ? !pack.popular : false } : pack
+          pack ? { ...pack, most_popular: pack.id === action.payload ? !pack.most_popular : false } : pack
         ))
       };
     
