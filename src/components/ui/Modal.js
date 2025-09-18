@@ -49,10 +49,10 @@ const Modal = ({
         
         {/* Modal Content */}
         <div className={`relative w-full ${sizeClasses[size]} transform transition-all`}>
-          <div className={`bg-white rounded-2xl shadow-xl ${className}`}>
+          <div className={`bg-surface rounded-2xl shadow-xl ${className}`}>
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-base">
                 <h3 className="text-xl font-bold text-gray-800">{title}</h3>
                 {showCloseButton && (
                   <Button

@@ -30,6 +30,8 @@ const ACTION_TYPES = {
 };
 
 // Initial state
+const persistedTheme = typeof window !== 'undefined' ? localStorage.getItem('app_theme') : null;
+
 const initialState = {
   currentView: 'dashboard',
   // Authentication
@@ -48,7 +50,7 @@ const initialState = {
     autoRenewal: true,
     currency: 'USD',
     timezone: 'UTC',
-    theme: 'light'
+    theme: persistedTheme || 'light'
   }
 };
 
@@ -175,6 +177,14 @@ export function AppProvider({ children }) {
       updatePermission: (permission) => dispatch({ type: ACTION_TYPES.UPDATE_PERMISSION, payload: permission }),
       deletePermission: (permissionId) => dispatch({ type: ACTION_TYPES.DELETE_PERMISSION, payload: permissionId }),
       updateSettings: (settings) => dispatch({ type: ACTION_TYPES.UPDATE_SETTINGS, payload: settings })
+      ,
+      // Theme helpers
+      toggleTheme: () => {
+        const newTheme = state.settings.theme === 'dark' ? 'light' : 'dark';
+        // persist
+        try { localStorage.setItem('app_theme', newTheme); } catch (e) { /* ignore */ }
+        dispatch({ type: ACTION_TYPES.UPDATE_SETTINGS, payload: { theme: newTheme } });
+      }
     }
   };
 

@@ -16,14 +16,14 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className={`${sidebarCollapsed ? 'w-20' : 'w-64'} bg-white shadow-xl transition-all duration-300 ease-in-out border-r border-gray-200 flex flex-col`}>
+    <div className={`${sidebarCollapsed ? 'w-20' : 'w-64'} bg-surface shadow-xl transition-all duration-300 ease-in-out border-r border-base flex flex-col`}>
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
+  <div className="p-6 border-b border-base">
         <div className="flex items-center justify-between">
           {!sidebarCollapsed && (
             <div>
               <h1 className="text-xl font-bold text-gray-800">E-Commerce</h1>
-              <p className="text-sm text-gray-500">SAAS Manager</p>
+              <p className="text-sm text-muted">SAAS Manager</p>
             </div>
           )}
           <Button
@@ -42,8 +42,8 @@ const Sidebar = () => {
           <button
             key={item.id}
             onClick={() => actions.setCurrentView(item.id)}
-            className={`w-full text-left px-6 py-3 flex items-center space-x-3 hover:bg-blue-50 transition-colors ${
-              currentView === item.id ? 'bg-blue-50 border-r-2 border-blue-500' : ''
+            className={`w-full text-left px-6 py-3 flex items-center space-x-3 hover:bg-white/20 transition-colors ${
+              currentView === item.id ? 'bg-white/20 border-r-2 border-blue-500' : ''
             }`}
           >
             <i className={`${item.icon} ${item.color} text-lg`}></i>
@@ -58,8 +58,8 @@ const Sidebar = () => {
 
       {/* Footer */}
       {!sidebarCollapsed && (
-        <div className="p-6 border-t border-gray-200">
-          <div className="text-center text-sm text-gray-500">
+        <div className="p-6 border-t border-base">
+          <div className="text-center text-sm text-muted">
             <p>© 2024 E-Commerce SAAS</p>
             <p>Version 1.0.0</p>
           </div>

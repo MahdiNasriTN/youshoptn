@@ -143,9 +143,9 @@ const UpdateProgress = () => {
   if (!showUpdate) return null;
 
   return (
-    <div className="fixed top-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-80 z-50">
+    <div className="fixed top-4 right-4 bg-surface border border-base rounded-lg shadow-lg p-4 w-80 z-50">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-gray-900">App Update</h3>
+  <h3 className="text-lg font-semibold text-gray-900">App Update</h3>
         {updateState.status === 'idle' && (
           <button
             onClick={handleDismiss}
@@ -157,7 +157,7 @@ const UpdateProgress = () => {
       </div>
 
       {/* Debug Information */}
-      <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
+  <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
         <div>ElectronAPI: {debugInfo.electronAPIAvailable ? '✅' : '❌'}</div>
         <div>App Version: {debugInfo.version || 'N/A'}</div>
         <div>Update Status: {updateState.status}</div>

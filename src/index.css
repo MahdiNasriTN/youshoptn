@@ -8,7 +8,8 @@ body {
   font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f9fafb;
+  background-color: var(--bg);
+  color: var(--text);
   overflow: hidden;
 }
 
@@ -56,6 +57,68 @@ body {
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
+
+/* Theme variables */
+:root {
+  --bg: #f9fafb;
+  --surface: #ffffff;
+  --muted: #6b7280;
+  --text: #111827;
+  --border: #e5e7eb;
+  --primary: #2563eb;
+}
+
+.dark {
+  --bg: #0b1220;
+  --surface: #0f1724;
+  --muted: #9ca3af;
+  --text: #e6eef8;
+  --border: #1f2937;
+  --primary: #60a5fa;
+}
+
+/* Utility classes that use variables */
+.bg-surface { background-color: var(--surface); }
+.text-muted { color: var(--muted); }
+.border-base { border-color: var(--border); }
+.text-primary { color: var(--primary); }
+
+/* Dark-mode overrides for common Tailwind utilities so existing markup adapts
+  without changing every component class. These map light utilities to dark variables. */
+.dark .bg-white { background-color: var(--surface) !important; }
+.dark .bg-white\/20 { background-color: rgba(255,255,255,0.02) !important; }
+.dark .bg-gray-50 { background-color: rgba(255,255,255,0.02) !important; }
+.dark .bg-gray-100 { background-color: rgba(255,255,255,0.03) !important; }
+.dark .bg-gray-500 { background-color: rgba(255,255,255,0.06) !important; }
+.dark .text-gray-800,
+.dark .text-gray-700 { color: var(--text) !important; }
+.dark .text-gray-600 { color: var(--muted) !important; }
+.dark .text-gray-400 { color: rgba(255,255,255,0.6) !important; }
+.dark .border-gray-200,
+.dark .border-gray-100 { border-color: var(--border) !important; }
+.dark .hover\:bg-gray-100:hover { background-color: rgba(255,255,255,0.03) !important; }
+.dark .disabled\:bg-gray-50:disabled { background-color: rgba(255,255,255,0.02) !important; }
+
+/* Ensure subtle shadows remain visible on dark surfaces */
+.dark .shadow-xl { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.6), 0 4px 6px -4px rgba(0,0,0,0.6); }
+/* medium shadow */
+.dark .shadow-md { box-shadow: 0 6px 12px -4px rgba(0,0,0,0.6), 0 2px 4px -2px rgba(0,0,0,0.6); }
+
+/* Blue accents (links, active items) should remain visible on dark */
+.dark .text-blue-700,
+.dark .text-blue-600 { color: var(--primary) !important; }
+.dark .border-blue-500 { border-color: var(--primary) !important; }
+.dark .text-blue-500 { color: var(--primary) !important; }
+
+/* Make some neutral grays used as fills slightly translucent on dark */
+.dark .bg-gray-500 { background-color: rgba(255,255,255,0.04) !important; }
+
+/* Ensure outline and focus rings are visible */
+.dark .focus\:ring-2:focus { box-shadow: 0 0 0 4px rgba(96,165,250,0.12); }
+
+/* Cards, modals, update UI: ensure borders and backgrounds are visible */
+.dark .rounded-2xl { background-clip: padding-box; }
+.dark .border { border-color: var(--border) !important; }
 
 /* Gradient backgrounds */
 .bg-gradient-to-r {

@@ -8,11 +8,26 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Packs from './pages/Packs';
 import Analytics from './pages/Analytics';
+import { useEffect } from 'react';
 
 const AppContent = () => {
   const { state } = useApp();
   const { currentView } = state;
   const { isAuthenticated } = state;
+  const theme = state.settings?.theme || 'light';
+
+  useEffect(() => {
+    try {
+      const root = document.documentElement;
+      if (theme === 'dark') {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    } catch (e) {
+      // ignore (SSR or test)
+    }
+  }, [theme]);
 
   const renderCurrentView = () => {
     switch (currentView) {

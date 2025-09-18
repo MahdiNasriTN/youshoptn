@@ -3,8 +3,9 @@ import { useApp } from '../../context/AppContext';
 import { Button } from '../ui';
 
 const Header = () => {
-  const { state } = useApp();
+  const { state, actions } = useApp();
   const { currentView } = state;
+  const currentTheme = state.settings?.theme || 'light';
 
   const getPageInfo = () => {
     const pageMap = {
@@ -40,20 +41,34 @@ const Header = () => {
   const pageInfo = getPageInfo();
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+  <header className="bg-surface shadow-sm border-b border-base px-6 py-4">
       <div className="flex items-center justify-between">
         {/* Page Title */}
         <div>
           <h2 className="text-2xl font-bold text-gray-800">
             {pageInfo.title}
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-muted mt-1">
             {pageInfo.description}
           </p>
         </div>
         
         {/* Header Actions */}
         <div className="flex items-center space-x-4">
+          {/* Theme toggle */}
+          <div>
+            <button
+              onClick={() => actions.toggleTheme()}
+              title="Toggle dark mode"
+              className="p-2 rounded-md hover:bg-white/20 transition-colors"
+            >
+              {currentTheme === 'dark' ? (
+                  <i className="fas fa-sun text-yellow-400"></i>
+              ) : (
+                  <i className="fas fa-moon text-gray-700"></i>
+              )}
+            </button>
+          </div>
           {/* Notifications */}
           <div className="relative">
             <Button

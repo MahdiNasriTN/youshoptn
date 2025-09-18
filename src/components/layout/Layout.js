@@ -4,7 +4,7 @@ import Header from './Header';
 
 const Layout = ({ children }) => {
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+  <div className="flex h-screen bg-surface overflow-hidden">
       {/* Sidebar */}
       <Sidebar />
 
